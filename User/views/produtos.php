@@ -2,28 +2,6 @@
 require '../../config.php';
 require 'verificar.php';
 
-$lancamentos = [];
-$prod = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod DESC limit 4");
-if ($prod->rowCount() > 0) {
-    $lancamentos = $prod->fetchALL(PDO::FETCH_ASSOC);
-}
-
-$antigos = [];
-$prod = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod ASC limit 4");
-if ($prod->rowCount() > 0) {
-    $antigos = $prod->fetchALL(PDO::FETCH_ASSOC);
-}
-$destaque1 = [];
-$desta = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod ASC limit 2");
-if ($desta->rowCount() > 0) {
-    $destaque1 = $desta->fetchALL(PDO::FETCH_ASSOC);
-}
-
-$galeria = [];
-$gal = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod DESC limit 6");
-if ($gal->rowCount() > 0) {
-    $galeria = $gal->fetchALL(PDO::FETCH_ASSOC);
-}
 
 $categorias = [];
 $cat = $pdo->query("SELECT *FROM categorias");
@@ -31,28 +9,37 @@ if ($cat->rowCount() > 0) {
     $categorias = $cat->fetchALL(PDO::FETCH_ASSOC);
 }
 
-if (!isset($_SESSION['itens'])) {
-    $_SESSION['itens'] = array();
-}
+$produtos = [];
+$id_categoria = filter_input(INPUT_GET, 'id_categoria');
+if ($id_categoria) {
+    $sql = $pdo->prepare("SELECT *FROM categorias WHERE id_categoria = :id_categoria");
+    $sql->bindValue(':id_categoria', $id_categoria);
+    $sql->execute();
 
-$id_prod = filter_input(INPUT_GET, 'id_prod');
-/* Adicionar ao carrinho */
-if ($id_prod) {
-    $idProduto = $_GET['id_prod'];
-    if (!isset($_SESSION['itens'][$idProduto])) {
-        $_SESSION['itens'][$idProduto] = 1;
+    $prod = $pdo->prepare("SELECT *FROM categorias, produtos WHERE id_categoria = :id_categoria AND categorias.id_categoria = produtos.categoria ORDER BY id_categoria");
+    $prod->bindValue(':id_categoria', $id_categoria);
+    $prod->execute();
+
+    if ($prod->rowCount() > 0) {
+        $produtos = $prod->fetchALL(PDO::FETCH_ASSOC);
     } else {
-        $_SESSION['itens'][$idProduto] += 1;
+        echo "<script>alert('Categoria sem produtos')</script>";
+        echo "<script>window.open('index.php', '_self')</script>";
     }
+} else {
+    echo "<script>alert('Categoria sem produtos')</script>";
+    echo "<script>window.open('index.php', '_self')</script>";
+}
+$ncat = [];
+$sql = $pdo->prepare("SELECT nome_categoria FROM categorias WHERE id_categoria = :id_categoria");
+$sql->bindValue(':id_categoria', $id_categoria);
+$sql->execute();
+if ($sql->rowCount() > 0) {
+    $ncat = $sql->fetch(PDO::FETCH_ASSOC);
 }
 
-$clientes = [];
-$cli = $pdo->query("SELECT *FROM usuarios WHERE acesso LIKE 'Cliente' ORDER BY id");
-if ($cli->rowCount() > 0) {
-    $clientes = $cli->fetchALL(PDO::FETCH_ASSOC);
-}  
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -62,11 +49,10 @@ if ($cli->rowCount() > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../assets/img/logo_navega.png" type="image/x-icon" />
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap"
         rel="stylesheet">
 
-    <title>Sistema de Gestão de Stock</title>
+    <title>Hexashop - Product Listing Page</title>
 
 
     <!-- Additional CSS Files -->
@@ -81,10 +67,6 @@ if ($cli->rowCount() > 0) {
     <link rel="stylesheet" href="assets/css/lightbox.css">
 
     <style>
-        .thumb .imagem_principal {
-            border: 10px solid rgb(163, 142, 235);
-        }
-
         .produtos {
             width: 300px;
             height: 320px;
@@ -92,29 +74,15 @@ if ($cli->rowCount() > 0) {
             border-radius: 4px;
         }
 
-        .destaque {
-            width: 300px;
-            height: 255px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-        }
-
-        #color {
-            color: rgb(163, 142, 235);
-        }
-        #top1{
-            color: white    ;
-        }
-        .gal {
-            width: 100%;
-            height: 185px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+        #top1 {
+            color: white;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ***** Preloader Start ***** -->
+    <!-- ***** Preloader  ***** -->
     <div id="preloader">
         <div class="jumper">
             <div></div>
@@ -122,9 +90,8 @@ if ($cli->rowCount() > 0) {
             <div></div>
         </div>
     </div>
-    <!-- ***** Preloader End ***** -->
+    <!-- ***** Preloader  ***** -->
 
-    <!-- ***** cabeçalho ***** -->
     <!-- ***** Header  ***** -->
     <header class="header-area header-sticky">
         <div class="container">
@@ -146,18 +113,18 @@ if ($cli->rowCount() > 0) {
                             <li class="submenu">
                                 <a href="javascript:;">Categorias</a>
                                 <ul>
-                                    <?php foreach($categorias as $lista):?>
-                                        <li><a href="produtos.php?id_categoria=<?=$lista['id_categoria'];?>"><?php echo $lista['nome_categoria'];?></a></li>
-                                    <?php endforeach;?>
+                                    <?php foreach ($categorias as $lista): ?>
+                                        <li><a href="produtos.php?id_categoria=<?= $lista['id_categoria']; ?>"><?php echo $lista['nome_categoria']; ?></a></li>
+                                    <?php endforeach; ?>
                                 </ul>
                             </li>
                             <li class="scroll-to-section" title="Ver perfil">
                                 <a href="../../Admin/views/dashboard.php">Painel</i></a>
                             </li>
                             <li class="scroll-to-section">
-                                <a href="logout.php">Logout(<?=$consulta['pnome'];?>)</a>
+                                <a href="logout.php">Logout</a>
                             </li>
-                        </ul>        
+                        </ul>
                         <a class='menu-trigger'>
                             <span>Menu</span>
                         </a>
@@ -168,88 +135,108 @@ if ($cli->rowCount() > 0) {
         </div>
     </header>
     <!-- ***** Header  ***** -->
-    <!-- ***** Main Banner Area Start ***** -->
-    <div class="page-heading" id="top1">
+
+    <!-- ***** top***** -->
+    <div>
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="text-center color">
-                        <h2>Registro de Produtos</h2>
-                        <span>Registrar Venda</span>
+                    <div class="inner-content">
+                        <h2 style="color: grey;">Nossos Produtos</h2>
+                        <h2 style="color: grey;">
+                            <?php echo $ncat['nome_categoria']; ?>
+                        </h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- ***** Main Banner Area End ***** -->
-    <!-- ***** recentes ***** -->
-    <section class="section" id="men">
+    <!-- ***** top ***** -->
+
+
+    <!-- ***** produtos ***** -->
+    <section class="section" id="products">
         <div class="container">
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="section-heading">
-                        <h2>Produtos registrados</h2>
-                        <a href="todosprodutos.php"><i class="fa fa-plus"></i>&nbsp;Adicionar Produto</a>
-                        <hr>
+                        <h2>Nossos produtos</h2>
                     </div>
                 </div>
             </div>
         </div>
         <div class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <?php
-                    /* Exibir o carrinho */
-                    if (count($_SESSION['itens']) == 0) {
-                        echo 'Registro de Produto Vazio <br><a href="todosprodutos.php"><i class="fa fa-plus"></i>&nbsp;Registrar um Produto</a>';
-                    } else {
-                        $_SESSION['dados'] = array();
-
-                        foreach ($_SESSION['itens'] as $idProduto => $quantidade) {
-                            $sql = $pdo->prepare("SELECT * FROM produtos WHERE id_prod=?");
-                            $sql->bindParam(1, $idProduto);
-                            $sql->execute();
-                            $produtos = $sql->fetchAll();
-                            $total = ($quantidade * $produtos[0]["preco_prod"]);
-                            $nova_quantidade_prod = ($produtos[0]["quantidade_prod"] - $quantidade);
-                            if ($nova_quantidade_prod >= 0) {
-                                echo
-                                    'Nome: ' . $produtos[0]["nome_prod"] . '<br>
-                                    Preço: ' . number_format($produtos[0]["preco_prod"], 2, ",", ".") . '&nbsp;KZ$<br>
-                                    Nº de pedidos: ' . $quantidade . '<br>
-                                    Total: ' . number_format($total, 2, ",", ".") . '&nbsp;KZ$<br><br>
-                                    <a class="btn btn-outline-danger text-uppercase" href="removeritem.php?id_prod=' . $idProduto . '">Remover Registro</a>
-                                    <hr>';
-
-                                /* Passar os dados no vetor para depois pegar no banco de dados*/
-                                array_push(
-                                    $_SESSION['dados'],
-                                    array(
-                                        'idProduto' => $idProduto,
-                                        'comprador' => $_SESSION['comprador'],
-                                        'nome' => $produtos[0]['nome_prod'],
-                                        'preco_stock' => $produtos[0]['preco_compra'],
-                                        'qtd' => $quantidade,
-                                        'preco_pedido' => $produtos[0]['preco_prod'],
-                                        'total' => $total,
-                                        'novaquantidade' => $nova_quantidade_prod
-                                    )
-                                );
-                            } else {
-                                unset($_SESSION['itens']);
-                                echo "<script>alert('Pedido superior a quantidade disponível no nosso Stock!')</script>";
-                                echo "<script>window.location = 'index.php'</script>";
-                            }
-                        }
-                        echo '<div class="text-right">
-                            <a class="btn btn-dark" href="todosprodutos.php">Adicionar&nbsp;<i class="fa fa-plus"></i></a>&nbsp;&nbsp;<a class="btn btn-success" href="finalizar.php">Registrar Venda</a>
-                        </div>';
-                    }
-                    ?>
-                </div>
+                <?php foreach ($produtos as $lista): ?>
+                    <div class="col-lg-4">
+                        <div class="item">
+                            <div class="thumb">
+                                <div class="hover-content">
+                                    <ul>
+                                        <li><a href="comprar.php?id_prod=<?= $lista['id_prod']; ?>"><i
+                                                    class="fa fa-eye"></i></a></li>
+                                        <li><a href="single-product.html"><i class="fa fa-star"></i></a></li>
+                                        <li title="Adicionar ao carrinho"><a
+                                                href="adicionarcarrinho.php?id_prod=<?= $lista['id_prod']; ?>"><i
+                                                    class="fa fa-shopping-cart"></i></a></li>
+                                    </ul>
+                                </div>
+                                <img class="produtos" src="../../Admin/views/img_upload/<?php echo $lista['imagem_prod']; ?>"
+                                    alt="">
+                            </div>
+                            <div class="down-content">
+                                <h4>
+                                    <?php echo $lista['nome_prod']; ?>
+                                </h4>
+                                <span>
+                                    <?php echo number_format($lista['preco_prod'], 2, ",", "."); ?>&nbsp;$KZ
+                                </span>
+                                <ul class="stars">
+                                    <?php
+                                    if ($lista['estado_prod'] == 'Em stock') {
+                                        $iddoProduto = $lista['id_prod'];
+                                        echo '<li style="color:green;">' . $lista['estado_prod'] . '</li>';
+                                    } else {
+                                        echo '<li style="color:red;">' . $lista['estado_prod'] . '</li>';
+                                    }
+                                    ?>:
+                                    <li>
+                                        <?php echo $lista['quantidade_prod']; ?>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
+            <!--
+                <div class="col-lg-12">
+                    <div class="pagination">
+                        <ul>
+                            <li>
+                                <a href="#">1</a>
+                            </li>
+                            <li class="active">
+                                <a href="#">2</a>
+                            </li>
+                            <li>
+                                <a href="#">3</a>
+                            </li>
+                            <li>
+                                <a href="#">4</a>
+                            </li>
+                            <li>
+                                <a href="#">></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div> -->
+        </div>
         </div>
     </section>
+    <!-- ***** produtos ***** -->
+
+    <!-- ***** Footer ***** -->
     <!-- ***** Footer  ***** -->
     <footer>
         <div class="container">
@@ -301,7 +288,6 @@ if ($cli->rowCount() > 0) {
             </div>
         </div>
     </footer>
-
 
     <!-- jQuery -->
     <script src="assets/js/jquery-2.1.0.min.js"></script>
