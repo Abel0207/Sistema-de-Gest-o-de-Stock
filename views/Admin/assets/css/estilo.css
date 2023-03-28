@@ -1,0 +1,75 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+html{
+    scroll-behavior: smooth;
+}
+.cabecalho{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.menu{
+    display: flex;
+    flex-direction: row;
+}
+.menu li{
+    list-style: none;
+    margin: 5px;
+    padding: 10px;
+}
+.menu li .btn-menu{
+    border: solid;
+    border-radius: .2rem;
+}
+.menu li .log{
+    background-color: green;
+    border-color: green;
+    color: white;
+}
+.menu li .reg{
+    background-color: #1465c7;
+    border-color: #1465c7;
+    color: white;
+}
+.menu li a{
+    text-decoration: none;
+    padding: 5px;
+    color: rgb(73, 73, 73);
+}
+/* login */
+.login{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.login p a, a{
+    text-decoration: none;
+}
+.login .btn{
+    background-color: green;
+    border-radius: .2rem;
+}
+
+/* Cadastrar */
+.registrar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.cad{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 90%;
+    justify-content: space-around;
+}
+.cad input, select{
+    width: 250px;
+    height: 50px;
+}
+.registrar .btn{
+    background-color: #1465c7;
+    border-radius: .2rem;
+}

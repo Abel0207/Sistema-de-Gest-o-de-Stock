@@ -1,0 +1,29 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+html{
+    scroll-behavior: smooth;
+}
+.navegacao{
+    background-color: green;
+    width: 10px;
+    height: 70%;
+}
+.navegacao:hover{
+    background-color: green;
+    width: 20%;
+    height: 70%;
+    transition: 1s;
+}
+.navegacao ul li{
+    padding: 0px;
+    list-style: none;
+    margin: 6%;
+    background-color: black;
+}
+.navegacao ul li a{
+    font-size: 18px;
+    text-decoration: none;
+    color: white;
+}
