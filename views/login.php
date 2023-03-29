@@ -1,235 +1,438 @@
 <?php
-    require 'config.php';
-
-    $lancamentos = [];
-    $prod = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod DESC limit 4");
-    if($prod->rowCount() > 0){
-        $lancamentos = $prod->fetchALL(PDO::FETCH_ASSOC);
-    }
-    $antigos = [];
-    $prod = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod ASC limit 4");
-    if($prod->rowCount() > 0){
-        $antigos = $prod->fetchALL(PDO::FETCH_ASSOC);
-    }
-    $destaque1 = [];
-    $desta = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod ASC limit 2");
-    if($desta->rowCount() > 0){
-        $destaque1 = $desta->fetchALL(PDO::FETCH_ASSOC);
-    }
-
-    $galeria = [];
-    $gal = $pdo->query("SELECT *FROM produtos, categorias WHERE produtos.categoria = categorias.id_categoria ORDER BY id_prod ASC limit 6");
-    if($gal->rowCount() > 0){
-        $galeria = $gal->fetchALL(PDO::FETCH_ASSOC);
-    }
-
-    $categorias = [];
-    $cat = $pdo->query("SELECT *FROM categorias");
-      if($cat->rowCount() > 0){
-        $categorias = $cat->fetchALL(PDO::FETCH_ASSOC);
-    }
+session_start();
+require 'config.php';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt br">
+
 <head>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./img/wind.png" type="image/x-icon"/>
-    
+    <link rel="icon" href="./img/wind.png" type="image/x-icon" />
     <title>LOGIN - LOONGOKA</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap');
-    </style>
 
 
     <!-- Additional CSS Files -->
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
 
-    <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.css">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="stylesheet" href="assets/css/templatemo-hexashop.css">
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
 
-    <link rel="stylesheet" href="assets/css/owl-carousel.css">
+        .wave {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            z-index: -1;
+        }
 
-    <link rel="stylesheet" href="assets/css/lightbox.css">
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 7rem;
+            padding: 0 2rem;
+        }
+
+        .img {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .login-content {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+        }
+
+        .img img {
+            width: 500px;
+        }
+
+        form {
+            width: 360px;
+        }
+
+        .login-content img {
+            height: 100px;
+        }
+
+        .login-content h2 {
+            margin: 15px 0;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 2.9rem;
+        }
+
+        .login-content .input-div {
+            position: relative;
+            display: grid;
+            grid-template-columns: 7% 93%;
+            margin: 25px 0;
+            padding: 5px 0;
+            border-bottom: 2px solid #d9d9d9;
+        }
+
+        .login-content .input-div.one {
+            margin-top: 0;
+        }
+
+        .i {
+            color: #d9d9d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .i i {
+            transition: .3s;
+        }
+
+        .input-div>div {
+            position: relative;
+            height: 45px;
+        }
+
+        .input-div>div>h5 {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+            transition: .3s;
+        }
+
+        .input-div:before,
+        .input-div:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            width: 0%;
+            height: 2px;
+            background-color: rgb(38, 135, 233);
+            transition: .4s;
+        }
+
+        .input-div:before {
+            right: 50%;
+        }
+
+        .input-div:after {
+            left: 50%;
+        }
+
+        .input-div.focus:before,
+        .input-div.focus:after {
+            width: 50%;
+        }
+
+        .input-div.focus>div>h5 {
+            top: -5px;
+            font-size: 15px;
+        }
+
+        .input-div.focus>.i>i {
+            color: rgb(38, 135, 233);
+        }
+
+        .input-div>div>input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            background: none;
+            padding: 0.5rem 0.7rem;
+            font-size: 1.2rem;
+            color: #555;
+            font-family: 'poppins', sans-serif;
+        }
+
+        .input-div.pass {
+            margin-bottom: 4px;
+        }
+
+        a {
+            display: block;
+            text-align: right;
+            text-decoration: none;
+            color: #999;
+            font-size: 0.9rem;
+            transition: .3s;
+        }
+
+        a:hover {
+            color: rgb(38, 135, 233);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            height: 50px;
+            border-radius: 25px;
+            outline: none;
+            border: none;
+            background-image: linear-gradient(to right, rgb(38, 135, 233), rgb(38, 135, 233), rgb(38, 135, 200));
+            background-size: 200%;
+            font-size: 1.2rem;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: .5s;
+        }
+
+        .btn:hover {
+            background-position: right;
+        }
+
+        .acessos {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media screen and (max-width: 1050px) {
+            .container {
+                grid-gap: 5rem;
+            }
+        }
+
+        @media screen and (max-width: 1000px) {
+            form {
+                width: 290px;
+            }
+
+            .login-content h2 {
+                font-size: 2.4rem;
+                margin: 8px 0;
+            }
+
+            .img img {
+                width: 400px;
+            }
+        }
+
+        @media screen and (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .img {
+                display: none;
+            }
+
+            .wave {
+                display: none;
+            }
+
+            .login-content {
+                justify-content: center;
+            }
+        }
+
+        /* Preloder */
+
+        #preloder {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 999999;
+            background: #000;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -13px;
+            margin-left: -13px;
+            border-radius: 60px;
+            animation: loader 0.8s linear infinite;
+            -webkit-animation: loader 0.8s linear infinite;
+        }
+
+        @keyframes loader {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+                border: 4px solid #f44336;
+                border-left-color: transparent;
+            }
+
+            50% {
+                -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+                border: 4px solid #673ab7;
+                border-left-color: transparent;
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+                border: 4px solid #f44336;
+                border-left-color: transparent;
+            }
+        }
+
+        @-webkit-keyframes loader {
+            0% {
+                -webkit-transform: rotate(0deg);
+                border: 4px solid #f44336;
+                border-left-color: transparent;
+            }
+
+            50% {
+                -webkit-transform: rotate(180deg);
+                border: 4px solid #673ab7;
+                border-left-color: transparent;
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                border: 4px solid #f44336;
+                border-left-color: transparent;
+            }
+        }
+    </style>
 
 </head>
+
 <body>
 
-<!-- ***** Preloader Start ***** -->
-<div id="preloader">
-        <div class="jumper">
-            <div></div>
-            <div></div>
-            <div></div>
+    <img class="wave" src="assets/img/login.png">
+    <div class="container">
+        <div class="img">
         </div>
-    </div>  
-    <!-- ***** Preloader End ***** -->
+        <div class="login-content">
+            <form method="post">
+                <img src="assets/img/gestão.png">
+                <?php
+                if (isset($_POST['submit'])) {
+                    $username = filter_input(INPUT_POST, 'username');
+                    $senha = filter_input(INPUT_POST, 'senha');
+                    if ($username && $senha) {
+                        $sql = $pdo->prepare("SELECT * FROM usuarios WHERE username = :username AND senha = :senha");
+                        $sql->bindValue(":username", $username);
+                        $sql->bindValue(":senha", md5($senha));
+                        $sql->execute();
 
-    <!-- ***** Main Banner Area Start ***** -->
-    <div class="page-heading" id="top">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ***** Main Banner Area End ***** -->
-
-    <!-- ***** cabeçalho ***** -->
-    <header class="header-area header-sticky">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <nav class="main-nav">
-                        <!-- ***** Logo ***** -->
-                        <a href="index.php" class="logo">
-                            <img src="../assets/img/logo_pequeno.png" alt="logotipo">
-                        </a>
-                        <!-- ***** Logod ***** -->
-
-                        <!-- ***** Menu  ***** -->
-                        <ul class="nav">
-                            <li class="scroll-to-section"><a href="index.php">Início</a></li>
-                            <li class="scroll-to-section"><a href="index.php">Destaques</a></li>
-                            <li class="scroll-to-section"><a href="index.php">Mais Recentes</a></li>
-                            <li class="scroll-to-section"><a href="index.php">Antigos</a></li>
-                            <li class="submenu">
-                                <a href="javascript:;">Categorias</a>
-                                <ul>
-                                    <li><a href="todosprodutos.php">Todos Produtos</a></li>
-                                    <?php foreach($categorias as $lista):?>
-                                        <li><a href="produtos.php?id_categoria=<?=$lista['id_categoria'];?>"><?php echo $lista['nome_categoria'];?></a></li>
-                                    <?php endforeach;?>
-                                </ul>
-                            </li>
-                            <li class="scroll-to-section">
-                                <a href="login.php">Login</a>
-                            </li>
-                        </ul>        
-                        <a class='menu-trigger'>
-                            <span>Menu</span>
-                        </a>
-                        <!-- ***** Menu ***** -->
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- ***** Header  ***** -->
-
-    <section class="text-center">
-    <div class="login">
-        <div class="login_texto">
-            <p>Bem-vindo de volta,</p>
-            <h1>Acesse sua conta</h1>
-        </div><br>
-        <div class="login_form">
-        <form action="entrar.php" method="post">
-            <input type="text" placeholder="Nome de usuário" name="username"><br><br>
-            <input type="password" placeholder="Senha" name="senha"><br><br>
-            <button  class="btn bg-primary" type="submit">Fazer Login</button>
-        </form><br>
-        Esqueceu a senha? <a href="#">Recuperar senha!</a><br>
-        Não possui uma conta? <a href="cadastrar.php">Cadastrar-se!</a>
-        </div>
-    </div>
-    </section>
-    
-   <!-- ***** Footer  ***** -->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="first-item">
-                        <div class="logo">
-                            <img src="../assets/img/logo_pequeno.png" alt="logotipo">
-                        </div>
-                        <ul>
-                            <li><a href="#">Rua E, Travassa 22 - Camama/Talatona-Angola</a></li>
-                            <li><a href="#">sgstock@gmail.com</a></li>
-                            <li><a href="#">911-872-114</a></li>
+                        $row = $sql->fetch(PDO::FETCH_ASSOC);
+                        if ($sql->rowCount() > 0) {
+                            if ($row['acesso'] == 'Gerente') {
+                                $_SESSION['id'] = $row['id'];
+                                echo '<div class="text-success" id="erroLogin">*Login bem sucedido<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                                echo "<script>setTimeout(function(){ window.location.href = 'Admin/views/dashboard.php';}, 1000);</script>";
+                            } elseif ($row['acesso'] == 'Cliente') {
+                                $_SESSION['id'] = $row['id'];
+                                echo '<div class="text-success" id="erroLogin">*Login bem sucedido<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                                echo "<script>setTimeout(function(){ window.location.href = 'uhome.php';}, 1000);</script>";
+                            } else {
+                                echo '<div class="alert alert-danger">*O Login falhou, tente mais tarde.</div>';
+                            }
+                        } else {
+                            echo '<div class="text-danger" id="erroLogin">*Nome de usuário ou senha incorrecta, tente novamente <button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                        }
+                    } else {
+                        echo '<div class="text-danger">*Prencha todos os campos <button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                    }
+                }
+                ?>
+                <h2 class="title">Bem vindo</h2>
+                <h6>Sistema de Gestão de Stock</h6>
+                <div class="input-div one">
+                    <div class="i">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="div">
+                        <h5>Nome de usuário</h5>
+                        <input type="text" name="username" class="input" required>
                     </div>
                 </div>
-                <div class="col-lg-3">
-                    <h4>Acesso Rápido</h4>
-                    <ul>
-                        <li><a href="#explore">Destaques</a></li>
-                        <li><a href="#men ">Mais Recentes</a></li>
-                        <li><a href="#women">Antigos</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3">
-                    <h4>Outros Links</h4>
-                    <ul>
-                        <li><a href="index.php">Página Inicial</a></li>
-                        <li><a href="sobre.php">Sobre nós</a></li>
-                        <li><a href="contactos.php">Contact Us</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3">
-                    <ul>
-                        <li><a href="">Políticas de privacidade</a></li>
-                        <li><a href="#">Ajuda</a></li>
-                        <li><a href="">Apoio: 939-248-383   </a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-12">
-                    <div class="under-footer">
-                        <p>Copyright © 2023 Abel Canas. Todos os direitos reservados. 
-                        <ul>
-                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                        </ul>
+                <div class="input-div pass">
+                    <div class="i">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="div">
+                        <h5>Senha</h5>
+                        <input type="password" name="senha" id="senha" class="input" required>
                     </div>
                 </div>
-            </div>
+                <div class="acessos">
+                    <a style="text-decoration: none;" href="recuperarsenha.php">Esqueceu sua senha?</a>
+                    <div id="btnMostrarSenha" style="display: flex; justify-content: space-between;">
+                        <i style="color: #d9d9d9;" class="fa fa-eye" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <input type="submit" name="submit" class="btn" value="Login">
+            </form>
         </div>
-    </footer>
-
-   
-<!-- jQuery -->
-    <script src="assets/js/jquery-2.1.0.min.js"></script>
-
-    <!-- Bootstrap -->
-    <script src="assets/js/popper.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-
-    <!-- Plugins -->
-    <script src="assets/js/owl-carousel.js"></script>
-    <script src="assets/js/accordions.js"></script>
-    <script src="assets/js/datepicker.js"></script>
-    <script src="assets/js/scrollreveal.min.js"></script>
-    <script src="assets/js/waypoints.min.js"></script>
-    <script src="assets/js/jquery.counterup.min.js"></script>
-    <script src="assets/js/imgfix.min.js"></script> 
-    <script src="assets/js/slick.js"></script> 
-    <script src="assets/js/lightbox.js"></script> 
-    <script src="assets/js/isotope.js"></script> 
-    
-    <!-- Global Init -->
-    <script src="assets/js/custom.js"></script>
+    </div>
+    <!-- Js Plugins -->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/main.js"></script>
 
     <script>
+        function fecharErroLogin() {
+            var divErroLogin = document.getElementById("erroLogin");
+            divErroLogin.parentNode.removeChild(divErroLogin);
+        }
 
-        $(function() {
-            var selectedClass = "";
-            $("p").click(function(){
-            selectedClass = $(this).attr("data-rel");
-            $("#portfolio").fadeTo(50, 0.1);
-                $("#portfolio div").not("."+selectedClass).fadeOut();
-            setTimeout(function() {
-              $("."+selectedClass).fadeIn();
-              $("#portfolio").fadeTo(50, 1);
-            }, 500);
-                
-            });
+        var btnMostrarSenha = document.getElementById("btnMostrarSenha");
+        var senhaInput = document.getElementById("senha");
+
+        btnMostrarSenha.addEventListener("click", function () {
+            if (senhaInput.type === "password") {
+                senhaInput.type = "text";
+                btnMostrarSenha.innerHTML = '<i style="color: #d9d9d9;" class="fa fa-eye-slash" aria-hidden="true"></i>';
+            } else {
+                senhaInput.type = "password";
+                btnMostrarSenha.innerHTML = '<i style="color: #d9d9d9;" class="fa fa-eye" aria-hidden="true"></i>';
+            }
+        });
+        const inputs = document.querySelectorAll(".input");
+        function addcl() {
+            let parent = this.parentNode.parentNode;
+            parent.classList.add("focus");
+        }
+
+        function remcl() {
+            let parent = this.parentNode.parentNode;
+            if (this.value == "") {
+                parent.classList.remove("focus");
+            }
+        }
+
+
+        inputs.forEach(input => {
+            input.addEventListener("focus", addcl);
+            input.addEventListener("blur", remcl);
         });
 
     </script>
-  </body>
-  </html>
-  
+</body>
+
+</html>
