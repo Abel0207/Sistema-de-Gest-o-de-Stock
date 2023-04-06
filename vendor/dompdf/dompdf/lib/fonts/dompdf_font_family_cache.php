@@ -80,4 +80,13 @@
   'fontawesome' => array(
     'normal' => $fontDir . '\fbaa011bddeb7069d656ecc396922063',
   ),
+  'roboto' => array(
+    'normal' => $fontDir . '\21960201651f2ea862182ff34dfd5ead',
+  ),
+  'roboto slab' => array(
+    'normal' => $fontDir . '\27b678aafcceecce672c80f831c062f3',
+  ),
+  'nucleoicons' => array(
+    'normal' => $fontDir . '\0f421bc35e91e16eeb985740a15b143f',
+  ),
 ) ?>

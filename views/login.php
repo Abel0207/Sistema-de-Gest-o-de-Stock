@@ -13,7 +13,7 @@ require 'config.php';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <link rel="icon" href="./img/wind.png" type="image/x-icon" />
-    <title>LOGIN - LOONGOKA</title>
+    <title>Sistema de Gestão de Stock e Venda</title>
 
 
     <!-- Additional CSS Files -->
@@ -29,6 +29,8 @@ require 'config.php';
         body {
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
+            display: flex;
+            flex-direction
         }
 
         .wave {
@@ -44,7 +46,7 @@ require 'config.php';
             height: 100vh;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-gap: 7rem;
+            grid-gap: 20rem;
             padding: 0 2rem;
         }
 
@@ -86,7 +88,7 @@ require 'config.php';
             grid-template-columns: 7% 93%;
             margin: 25px 0;
             padding: 5px 0;
-            border-bottom: 2px solid #d9d9d9;
+            border-bottom: 2px solid rgb(254, 220, 40);
         }
 
         .login-content .input-div.one {
@@ -94,7 +96,7 @@ require 'config.php';
         }
 
         .i {
-            color: #d9d9d9;
+            color: rgb(254, 220, 40);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -126,7 +128,7 @@ require 'config.php';
             bottom: -2px;
             width: 0%;
             height: 2px;
-            background-color: rgb(38, 135, 233);
+            background-color: rgb(254, 220, 40);
             transition: .4s;
         }
 
@@ -149,7 +151,7 @@ require 'config.php';
         }
 
         .input-div.focus>.i>i {
-            color: rgb(38, 135, 233);
+            color: rgb(254, 220, 40);
         }
 
         .input-div>div>input {
@@ -181,7 +183,7 @@ require 'config.php';
         }
 
         a:hover {
-            color: rgb(38, 135, 233);
+            color: rgb(254, 220, 40);
         }
 
         .btn {
@@ -191,7 +193,7 @@ require 'config.php';
             border-radius: 25px;
             outline: none;
             border: none;
-            background-image: linear-gradient(to right, rgb(38, 135, 233), rgb(38, 135, 233), rgb(38, 135, 200));
+            background-image: linear-gradient(to right, rgb(254, 220, 40), rgb(254, 220, 40), rgb(254, 220, 0));
             background-size: 200%;
             font-size: 1.2rem;
             color: #fff;
@@ -323,13 +325,13 @@ require 'config.php';
 
 <body>
 
-    <img class="wave" src="assets/img/login.png">
+    <img class="wave" style="width:50%;"
+        src="https://www.unicesumar.edu.br/blog/wp-content/uploads/2020/01/seguran%C3%A7a-no-trabalho.jpg">
     <div class="container">
-        <div class="img">
-        </div>
+        <div class="img"></div>
         <div class="login-content">
             <form method="post">
-                <img src="assets/img/gestão.png">
+                <img src="assets/img/logo.png">
                 <?php
                 if (isset($_POST['submit'])) {
                     $username = filter_input(INPUT_POST, 'username');
@@ -342,52 +344,54 @@ require 'config.php';
 
                         $row = $sql->fetch(PDO::FETCH_ASSOC);
                         if ($sql->rowCount() > 0) {
-                            if ($row['acesso'] == 'Gerente') {
+                            if ($row['acesso'] == 'Admin') {
                                 $_SESSION['id'] = $row['id'];
-                                echo '<div class="text-success" id="erroLogin">*Login bem sucedido<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                                echo '<div class="text-success" id="erroLogin">*Login feito com sucesso<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
                                 echo "<script>setTimeout(function(){ window.location.href = 'Admin/views/dashboard.php';}, 1000);</script>";
                             } elseif ($row['acesso'] == 'Cliente') {
                                 $_SESSION['id'] = $row['id'];
-                                echo '<div class="text-success" id="erroLogin">*Login bem sucedido<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                                echo "<script>setTimeout(function(){ window.location.href = 'uhome.php';}, 1000);</script>";
+                                echo '<div class="text-success" id="erroLogin">*Login feito com sucesso<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                                echo "<script>setTimeout(function(){ window.location.href = 'indexuser.php';}, 1000);</script>";
                             } else {
-                                echo '<div class="alert alert-danger">*O Login falhou, tente mais tarde.</div>';
+                                echo '<div class="text-danger" id="erroLogin">*O login falhou, tente mais tarde.<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
                             }
                         } else {
                             echo '<div class="text-danger" id="erroLogin">*Nome de usuário ou senha incorrecta, tente novamente <button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
                         }
                     } else {
-                        echo '<div class="text-danger">*Prencha todos os campos <button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
+                        echo '<div class="text-danger" id="erroLogin">*Prencha todos os campos e tente novamente <button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
                     }
                 }
                 ?>
                 <h2 class="title">Bem vindo</h2>
-                <h6>Sistema de Gestão de Stock</h6>
-                <div class="input-div one">
-                    <div class="i">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="div">
-                        <h5>Nome de usuário</h5>
-                        <input type="text" name="username" class="input" required>
-                    </div>
-                </div>
-                <div class="input-div pass">
-                    <div class="i">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="div">
-                        <h5>Senha</h5>
-                        <input type="password" name="senha" id="senha" class="input" required>
+                <h6>Environmental Legal Compliance</h6>
+                <div class="col-12">
+                    <label class="visually-hidden" for="inlineFormInputGroupUsername"></label>
+                    <div class="input-group">
+                        <div class="input-group-text"><i class="fa fa-at"></i></div>
+                        <input type="text" class="form-control" name="username" id="inlineFormInputGroupUsername"
+                            placeholder="Usuário" required>
                     </div>
                 </div>
-                <div class="acessos">
+                <div class="col-12">
+                    <label class="visually-hidden" for="inlineFormInputGroupUsername"></label>
+                    <div class="input-group">
+                        <div class="input-group-text"><i class="fa fa-lock"></i></div>
+                        <input type="password" class="form-control" name="senha"
+                            id="senha" placeholder="Senha" required>
+                    </div>
+                </div>
+                <div class="acessos" style="margin-top: 5%;">
                     <a style="text-decoration: none;" href="recuperarsenha.php">Esqueceu sua senha?</a>
                     <div id="btnMostrarSenha" style="display: flex; justify-content: space-between;">
-                        <i style="color: #d9d9d9;" class="fa fa-eye" aria-hidden="true"></i>
+                        <i style="color: rgb(254,220,40);" class="fa fa-eye" aria-hidden="true"></i>
                     </div>
                 </div>
                 <input type="submit" name="submit" class="btn" value="Login">
+                <div class="d-flex flex-start" style="justify-content: space-between">
+                    <a href="cadastrar.php">Não possui uma conta?</a></p>
+                    <a href="index.php">Início</a>
+                </div>
             </form>
         </div>
     </div>
@@ -407,10 +411,10 @@ require 'config.php';
         btnMostrarSenha.addEventListener("click", function () {
             if (senhaInput.type === "password") {
                 senhaInput.type = "text";
-                btnMostrarSenha.innerHTML = '<i style="color: #d9d9d9;" class="fa fa-eye-slash" aria-hidden="true"></i>';
+                btnMostrarSenha.innerHTML = '<i style="color: rgb(254,220,40);" class="fa fa-eye-slash" aria-hidden="true"></i>';
             } else {
                 senhaInput.type = "password";
-                btnMostrarSenha.innerHTML = '<i style="color: #d9d9d9;" class="fa fa-eye" aria-hidden="true"></i>';
+                btnMostrarSenha.innerHTML = '<i style="color: rgb(254,220,40);" class="fa fa-eye" aria-hidden="true"></i>';
             }
         });
         const inputs = document.querySelectorAll(".input");
