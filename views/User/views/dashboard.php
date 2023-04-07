@@ -16,6 +16,18 @@ FOREIGN KEY (id_user_empresa) REFERENCES usuarios(id)
 $verificar_empresa = $consulta['id'];
 $sql = $pdo->prepare("SELECT * FROM empresas, usuarios WHERE $consulta[id] = usuarios.id AND empresas.id_user_empresa = usuarios.id ");
 $sql->execute();
+$row = $sql->fetch(PDO::FETCH_ASSOC);
+if ($sql->rowCount() <= 0) {
+  echo "<script>setTimeout(function(){ window.location.href = 'cadastrarempresa.php';},);</script>";
+}
+
+$empresa = [];
+$emp = $pdo->query("SELECT *FROM empresas, ramos, usuarios, categorias WHERE empresas.ramo_empresa = ramos.id_ramo AND empresas.id_user_empresa = usuarios.id AND empresas.categoria_empresa = categorias.id_categoria ORDER BY id_empresa");
+if ($emp->rowCount() > 0) {
+  $empresa = $emp->fetch(PDO::FETCH_ASSOC);
+}
+$sql = $pdo->query("SELECT COUNT(id_decreto) AS nome_prod FROM decretos, ramos, categorias WHERE decretos.ramo_decreto = ramos.id_ramo AND ramos.referencia_categoria = categorias.id_categoria");
+$prodcount = $sql->fetch(PDO::FETCH_ASSOC);
 
 $row = $sql->fetch(PDO::FETCH_ASSOC);
 if ($sql->rowCount() <= 0) {
@@ -28,8 +40,7 @@ $contar = $sql->fetch(PDO::FETCH_ASSOC);
 $sql = $pdo->query("SELECT COUNT(id_categoria) AS nome_categoria FROM categorias");
 $categoriacount = $sql->fetch(PDO::FETCH_ASSOC);
 
-$sql = $pdo->query("SELECT COUNT(id_prod) AS nome_prod FROM produtos");
-$prodcount = $sql->fetch(PDO::FETCH_ASSOC);
+
 
 $sql = $pdo->query("SELECT COUNT(id_forn) AS nome_forn FROM fornecedores");
 $forncount = $sql->fetch(PDO::FETCH_ASSOC);
@@ -134,7 +145,7 @@ $cat_mais_livro = $categorias_mais_produtos->fetchALL(PDO::FETCH_ASSOC);
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white " href="stock.php">
+          <a class="nav-link text-white " href="empresa.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="fa fa-building" aria-hidden="true"></i>
             </div>
@@ -214,7 +225,7 @@ $cat_mais_livro = $categorias_mais_produtos->fetchALL(PDO::FETCH_ASSOC);
               <a href="logout.php" class="nav-link text-body font-weight-bold px-0">
                 <i class="fa fa-user"></i>
                 <span class="d-sm-inline d-none">
-                  <?php echo $consulta['pnome'] . '&nbsp;' . $consulta['unome'] . '&nbsp;(' . $consulta['acesso'] . ')'; ?>
+                  <?php echo $consulta['nome'] .'&nbsp;(' . $consulta['acesso'] . ')'; ?>
                 </span>
               </a>
             </li>&nbsp;&nbsp;

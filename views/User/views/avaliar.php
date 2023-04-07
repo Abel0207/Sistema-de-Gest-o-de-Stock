@@ -2,17 +2,23 @@
 require '../../config.php';
 require 'verificar.php';
 
-
 $categorias = [];
 $cat = $pdo->query("SELECT *FROM categorias ORDER BY id_categoria");
 if ($cat->rowCount() > 0) {
   $categorias = $cat->fetchALL(PDO::FETCH_ASSOC);
 }
+
+$verificar_empresa = $consulta['id'];
+$sql = $pdo->prepare("SELECT * FROM empresas, usuarios WHERE $consulta[id] = usuarios.id AND empresas.id_user_empresa = usuarios.id ");
+$sql->execute();
+$row = $sql->fetch(PDO::FETCH_ASSOC);
+
 $ramos = [];
-$ramo = $pdo->query("SELECT *FROM ramos ORDER BY id_ramo");
+$ramo = $pdo->query("SELECT *FROM decretos, empresas WHERE decretos.ambito_decreto = $row[categoria_empresa] AND decretos.ramo_decreto = $row[ramo_empresa] AND empresas.id_user_empresa = $consulta[id]");
 if ($ramo->rowCount() > 0) {
   $ramos = $ramo->fetchALL(PDO::FETCH_ASSOC);
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-pt">
@@ -200,134 +206,26 @@ if ($ramo->rowCount() > 0) {
           <div class="card my-4">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
               <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3" style="padding-left: 2%;">
-                <h4 style="color: white;">Cadastrar nova empresa</h4>
+                <h4 style="color: white;">Faça uma breve avaliação</h4>
               </div>
             </div>
-            <div class="card-body text-center">
+            <div class="card-body">
               <div class="table-responsive p-0">
                 <form method="POST" class="registrar" autocomplete="off" enctype="multipart/form-data">
                   <div class="modal-body">
+                    <p class="active"><b>Esta avaliação servirá para ver se a Empresa está 100% apta para actuar neste ramo!</b></p>
                     <?php
-                    if (isset($_POST["submit"])) {
-                      $nome_empresa = filter_input(INPUT_POST, 'nome_empresa');
-                      $numero_empresa = filter_input(INPUT_POST, 'numero_empresa');
-                      $email_empresa = filter_input(INPUT_POST, 'email_empresa');
-                      $endereco = filter_input(INPUT_POST, 'endereco');
-                      $nif_empresa = filter_input(INPUT_POST, 'nif_empresa');
-                      $id_user_empresa = filter_input(INPUT_POST, 'id_user_empresa');
-                      $categoria_empresa = filter_input(INPUT_POST, 'categoria_empresa');
-                      $ramo_empresa = filter_input(INPUT_POST, 'ramo_empresa');
-                      $descricao = filter_input(INPUT_POST, 'descricao');
-                      if (!isset($_FILES["logo_empresa"])) {
-                        echo '<div class="text-danger" id="erroLogin">*Imagem não encontrada, coloque outra<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                      } else {
-                        $fileName = $_FILES["logo_empresa"]["name"];
-                        $fileSize = $_FILES["logo_empresa"]["size"];
-                        $tmpName = $_FILES["logo_empresa"]["tmp_name"];
-                        $validateImageExtension = ['jpg', 'jpeg', 'png'];
-                        $imageExtension = explode('.', $fileName);
-                        $imageExtension = strtolower(end($imageExtension));
-                        if (!in_array($imageExtension, $validateImageExtension)) {
-                          echo '<div class="text-danger" id="erroLogin">*Formato inválido, os formatos suportados são: png, jpg, e jpeg.<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                        } elseif ($fileSize > 2000000) {
-                          echo '<div class="text-danger" id="erroLogin">*O tamanho da sua imagem excede os 2mb, escolha outra que seja menor que 2mb.<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                        } else {
-                          $newImageName = uniqid();
-                          $newImageName .= '.' . $imageExtension;
-                          move_uploaded_file($tmpName, 'logo_upload/' . $newImageName);
-                          if ($nome_empresa && $newImageName && $numero_empresa && $email_empresa && $endereco && $nif_empresa && $id_user_empresa && $categoria_empresa && $ramo_empresa && $descricao) {
-                            $sql = $pdo->prepare("INSERT INTO empresas (nome_empresa, logo_empresa, numero_empresa, email_empresa, endereco, nif_empresa, id_user_empresa, categoria_empresa, ramo_empresa, descricao) VALUES (?,?,?,?,?,?,?,?,?,?)");
-                            $sql->bindParam(1, $nome_empresa);
-                            $sql->bindParam(2, $newImageName);
-                            $sql->bindParam(3, $numero_empresa);
-                            $sql->bindParam(4, $email_empresa);
-                            $sql->bindParam(5, $endereco);
-                            $sql->bindParam(6, $nif_empresa);
-                            $sql->bindParam(7, $id_user_empresa);
-                            $sql->bindParam(8, $categoria_empresa);
-                            $sql->bindParam(9, $ramo_empresa);
-                            $sql->bindParam(10, $descricao);
-                            $sql->execute();
-                            echo '<div class="text-success" id="erroLogin">*Empresa foi cadastrada<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                            echo "<script>setTimeout(function(){ window.location.href = 'avaliar.php';}, 3000);</script>";
-                          } else {
-                            echo '<div class="text-danger" id="erroLogin">*Prencha todos os campos<button type="button" class="close" onclick="fecharErroLogin()"><span>&times;</span></button></div>';
-                          }
-                        }
-                      }
-                    }
+                    if (isset($_POST["submit"])) {}
                     ?>
                     <div class="cad d-flex">
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Nome da empresa*</label>
-                        <input style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;" type="text"
-                          name="nome_empresa" placeholder="Nome" class="form-control" aria-describedby="emailHelp">
+                      <div class="col-md-4 text-left" style="margin: 3px;">
+                        <?php foreach ($ramos as $lista): ?>
+                          <label for="exampleInputPassword1" class="form-label"><?php echo $lista['nome_decreto'] ?></label>
+                          <input value="<?php echo $lista['id_decreto'] ?>" style="padding: 100%; border-radius: 4px; overflow:hidden; border: solid 2px;" type="checkbox" id="vehicle2" name="vehicle2" ><br>
+                        <?php endforeach; ?>
                       </div>
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="formFileSm" class="form-label">Logotipo*</label>
-                        <input type="file" name="logo_empresa"
-                          style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;"
-                          accept=".jpg, .jpeg, .png" class="form-control" aria-describedby="emailHelp">
-                      </div>
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Nº principal da Empresa*</label>
-                        <input style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;" type="text"
-                          minlength="9" maxlength="9" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                          name="numero_empresa" placeholder="Quantidade do produto" class="form-control"
-                          aria-describedby="emailHelp">
-                      </div>
+                      <br>
                     </div>
-                    <div class="cad d-flex">
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Email principal da Empresa*</label>
-                        <input style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;" type="email"
-                          name="email_empresa" placeholder="Email" class="form-control" aria-describedby="emailHelp">
-                      </div>
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Endereço*</label>
-                        <input style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;"
-                          name="endereco" placeholder="Endereço" id="verpass" type="text" class="form-control">
-                      </div>
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">NIF*</label>
-                        <input style="padding: 3%; border-radius: 4px; overflow:hidden; border: solid 2px;"
-                          name="nif_empresa" placeholder="NIF" type="text" class="form-control">
-                      </div>
-                      <input hidden name="id_user_empresa" value="<?php echo $consulta['id'] ?>">
-                    </div>
-                    <div class="cad d-flex">
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Categoria*</label><br>
-                        <select name="categoria_empresa"
-                          style="border-radius: 4px; border: solid 2px; width: 100%; height: 80%;" placeholder="Gênero"
-                          style="margin: 1%;">
-                          <option value="">Escolher categoria</option>
-                          <?php foreach ($categorias as $lista): ?>
-                            <option value="<?php echo $lista['id_categoria'] ?>"><?php echo $lista['nome_categoria'] ?>
-                            </option>
-                          <?php endforeach; ?>
-                        </select>
-                      </div>
-                      <div class="col-md-4 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Ramo*</label><br>
-                        <select name="ramo_empresa"
-                          style="border-radius: 4px; border: solid 2px; width: 100%; height: 80%;" placeholder="Gênero"
-                          style="margin: 1%;">
-                          <option value="">Escolher ramo</option>
-                          <?php foreach ($ramos as $lista): ?>
-                            <option value="<?php echo $lista['id_ramo'] ?>"><?php echo $lista['nome_ramo'] ?></option>
-                          <?php endforeach; ?>
-                        </select>
-                      </div>
-                    </div><br>
-                    <div class="cad d-flex">
-                      <div class="col-md-12 text-center" style="margin: 3px;">
-                        <label for="exampleInputPassword1" class="form-label">Descrição*</label><br>
-                        <textarea style="border-radius: 4px; border: solid 2px; width: 100%; height: 100%;"
-                          name="descricao" id="" cols="30" rows="5"></textarea>
-                      </div>
-                    </div>
-                    <br>
                     <div class="modal-footer">
                       <button type="submit" name="submit" class="btn btn-primary"><i class="fa fa-plus"
                           aria-hidden="true"></i>&nbsp;Nome</button>
